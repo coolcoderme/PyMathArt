@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Tests
+        run: pytest
+      - name: Examples produce valid graph state
+        run: |
+          python -m pydesmos examples/rose_curve.py -o /tmp/rose.json --html /tmp/rose.html
+          python -m pydesmos examples/lissajous_art.py -o /tmp/lissajous.json
+          python -m pydesmos examples/clickable_game.py -o /tmp/click.json
+          python -m pydesmos examples/tone_demo.py -o /tmp/tone.json --html /tmp/tone.html
+          python -m pydesmos examples/surface_3d.py --target 3d -o /tmp/surface.json --html /tmp/surface.html
